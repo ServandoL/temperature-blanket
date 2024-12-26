@@ -1,0 +1,25 @@
+{
+  "name": "temperature-backend-api",
+  "version": "1.0.0",
+  "description": "API server for temperature-blanket ui",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/router": "^13.1.0",
+    "koa": "^2.15.3",
+    "mongodb": "^6.12.0"
+  },
+  "devDependencies": {
+    "@tsconfig/strictest": "^2.0.5",
+    "@types/koa": "^2.15.0",
+    "@types/koa__router": "^12.0.4",
+    "prettier": "^3.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
