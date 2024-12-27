@@ -5,19 +5,39 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "env-cmd node dist/index.js",
+    "debug": "npm run generate && npm run build && env-cmd node --loader ts-node/esm index.ts",
+    "generate": "graphql-codegen --config tools/codegen.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@koa/router": "^13.1.0",
+    "@apollo/server": "^4.11.2",
+    "@as-integrations/koa": "^1.1.1",
+    "await-to-js": "^3.0.0",
+    "env-cmd": "^10.1.0",
+    "graphql": "^16.10.0",
+    "graphql-tag": "^2.12.6",
     "koa": "^2.15.3",
-    "mongodb": "^6.12.0"
+    "koa-bodyparser": "^4.4.1",
+    "koa-json": "^2.0.2",
+    "mongodb": "^6.12.0",
+    "node-fetch": "^3.3.2",
+    "pino": "^9.6.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript-resolvers": "^4.4.1",
     "@tsconfig/strictest": "^2.0.5",
     "@types/koa": "^2.15.0",
     "@types/koa__router": "^12.0.4",
+    "@types/koa-bodyparser": "^4.3.12",
+    "@types/koa-json": "^2.0.23",
+    "@types/koa-logger": "^3.1.5",
+    "@types/node": "^22.10.2",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"

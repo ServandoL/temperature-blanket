@@ -1,4 +1,6 @@
 import { Db, MongoClient, Document, MongoClientOptions } from 'mongodb';
+import { log } from './index.js';
+import { toError } from './utils.js';
 
 export class MongoRepo {
   public static _instance: MongoRepo;
@@ -11,19 +13,19 @@ export class MongoRepo {
     this._client = new MongoClient(url, options);
     this._client
       .on('error', (err) => {
-        console.error(err);
+        log.error({ loc: MongoRepo.name, error: toError(err) });
       })
       .on('connectionCreated', (event) => {
-        console.log(event);
+        log.info({ loc: MongoRepo.name, event });
       })
       .on('commandFailed', (err) => {
-        console.error(err);
+        log.error({ loc: MongoRepo.name, error: err });
       })
       .on('connectionClosed', (event) => {
-        console.log(event);
+        log.info({ loc: MongoRepo.name, event });
       })
       .on('connectionReady', (event) => {
-        console.log(event);
+        log.info({ loc: MongoRepo.name, event });
       });
     this._db = this._client.db(db);
   }
@@ -41,6 +43,7 @@ export class MongoRepo {
     if (!url) throw new Error('MongoRepo URL must be defined');
     const mongo = new MongoRepo(url, options);
     await mongo.client.connect();
+    MongoRepo._instance = mongo;
   }
 
   public collection<T extends Document>(name: string) {

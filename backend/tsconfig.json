@@ -1,9 +1,9 @@
 {
   "extends": "@tsconfig/strictest",
   "compilerOptions": {
-    "outDir": "backend/dist",
+    "outDir": "dist",
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "node",
   }
 }

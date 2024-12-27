@@ -1,0 +1,148 @@
+type Query {
+  history: HistoryResponse
+  forecast(input: ForecastInput!): ForecastResponse
+}
+
+input ForecastInput {
+  q: String!
+}
+type ForecastResponse {
+  data: ForecastItem
+}
+type HistoryResponse {
+  data: [ForecastItem]
+}
+
+type ForecastItem {
+  _id: ID
+  location: HistoryLocation
+  current: ForecastCurrent
+  forecast: Forecast
+}
+type Forecast {
+  forecastday: [ForecastDay]
+}
+type ForecastDayAstroDetail {
+  sunrise: String
+  sunset: String
+  moonrise: String
+  moonset: String
+  moon_phase: String
+  moon_illumination: Float
+  is_moon_up: Float
+  is_sun_up: Float
+}
+type ForecastDay {
+  date: String
+  date_epoch: Float
+  day: ForecastDayDetail
+  astro: ForecastDayAstroDetail
+  hour: [ForecastDayHour]
+}
+type ForecastDayDetail  {
+  maxtemp_c: Float
+  maxtemp_f:Float
+  mintemp_c:Float
+  mintemp_f: Float
+  avgtemp_c: Float
+  avgtemp_f: Float
+  maxwind_mph: Float
+  maxwind_kph:Float
+  totalprecip_mm: Float
+  totalprecip_in: Float
+  totalsnow_cm: Float
+  avgvis_km: Float
+  avgvis_miles: Float
+  avghumidity:Float
+  daily_will_it_rain: Float
+  daily_chance_of_rain: Float
+  daily_will_it_snow: Float
+  daily_chance_of_snow: Float
+  condition: ForecastConditionDetail
+  uv: Float
+}
+
+type ForecastCurrent {
+  last_updated_epoch: Float
+  last_updated: String
+  temp_c: Float
+  temp_f: Float
+  is_day:Float
+  condition: ForecastConditionDetail
+  wind_mph: Float
+  wind_kph:Float
+  wind_degree:Float
+  wind_dir: String
+  pressure_mb: Float
+  pressure_in: Float
+  precip_mm: Float
+  precip_in: Float
+  humidity: Float
+  cloud: Float
+  feelslike_c:Float
+  feelslike_f: Float
+  windchill_c: Float
+  windchill_f: Float
+  heatindex_c: Float
+  heatindex_f:Float
+  dewpoint_c: Float
+  dewpoint_f: Float
+  vis_km: Float
+  vis_miles: Float
+  uv: Float
+  gust_mph: Float
+  gust_kph: Float
+}
+type HistoryLocation {
+  name: String
+  region: String
+  country: String
+  lat: Float
+  lon: Float
+  tz_id: String
+  localtime_epoch: Float
+  localtime: String
+}
+type ForecastConditionDetail {
+  text: String
+  icon: String
+  code: Float
+}
+
+type ForecastDayHour
+{
+  time_epoch: Float
+  time: String
+  temp_c: Float
+  temp_f: Float
+  is_day: Float
+  condition: ForecastConditionDetail
+  wind_mph: Float
+  wind_kph: Float
+  wind_degree:Float
+  wind_dir:String
+  pressure_mb: Float
+  pressure_in: Float
+  precip_mm: Float
+  precip_in: Float
+  snow_cm: Float
+  humidity:Float
+  cloud:Float
+  feelslike_c: Float
+  feelslike_f:Float
+  windchill_c: Float
+  windchill_f: Float
+  heatindex_c: Float
+  heatindex_f:Float
+  dewpoint_c:Float
+  dewpoint_f: Float
+  will_it_rain: Float
+  chance_of_rain: Float
+  will_it_snow: Float
+  chance_of_snow: Float
+  vis_km: Float
+  vis_miles:Float
+  gust_mph:Float
+  gust_kph: Float
+  uv: Float
+}

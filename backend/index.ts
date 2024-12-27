@@ -1,64 +1,82 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { gql } from 'graphql-tag';
+import * as fs from 'node:fs';
 import Koa from 'koa';
+import * as http from 'node:http';
+import { ApolloServer } from '@apollo/server';
 import { MongoRepo } from './mongo.js';
-import Router from '@koa/router';
-import { $Weather, IWeather } from './common.js';
+import json from 'koa-json';
+import bodyParser from 'koa-bodyparser';
+import { toError } from './utils.js';
+import pino from 'pino';
+import { resolvers } from './resolvers.js';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { koaMiddleware } from '@as-integrations/koa';
 
-await MongoRepo.prepare({ appName: 'temperature-blanket' });
-const app = new Koa();
-const router = new Router();
-// logger
-app.use(async (ctx, next) => {
-  await next();
-  const rt = ctx.response.get('X-Response-Time');
-  console.log(`${ctx.method} ${ctx.url} - ${rt}`);
+export const log = pino();
+
+(async () => {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const schemaPath = path.join(__dirname, 'schema.graphql');
+  const typeDefs = gql`
+    ${fs.readFileSync(schemaPath, 'utf8')}
+  `;
+  const app = new Koa();
+  const httpServer = http.createServer(app.callback());
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    introspection: process.env['INTROSPECTION'] === 'true',
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+  });
+  await MongoRepo.prepare({ appName: 'blanket-api' });
+  await server.start();
+
+  app.use(json());
+  app.use(bodyParser());
+  app.use(async (ctx, next) => {
+    if (ctx.path === '/health') {
+      ctx.status = 200;
+      ctx.body = { message: 'ok', uptime: process.uptime() + ' seconds' };
+    } else await next();
+  });
+  // Default error handling
+  app.use(async (ctx, next) => {
+    try {
+      await next();
+    } catch (error) {
+      const message = (error as Error)?.message ?? 'INTERNAL SERVER ERROR';
+      log.error({
+        loc: 'default',
+        error: toError(error as Error),
+      });
+      ctx.status = 500;
+      ctx.body = JSON.stringify({ error: message });
+    }
+  });
+
+  // Req/Res Trace
+  app.use(async (ctx, next) => {
+    const headers = {
+      ...JSON.parse(JSON.stringify({ ...ctx.request.headers })),
+    };
+    const toTrace = !ctx.request.URL.pathname
+      .toLowerCase()
+      .startsWith('/health');
+    if (toTrace) {
+      log.info({ loc: 'server.koa.request', headers, body: ctx.request.body });
+    }
+    await next();
+    if (toTrace) {
+      log.info({ loc: 'server.koa.response', body: ctx.response.body });
+    }
+  });
+  app.use(koaMiddleware(server));
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: 3000 }, resolve)
+  );
+  log.info({ loc: 'server', message: 'Listening on port 3000' });
+})().catch((err) => {
+  log.error({ loc: 'server', error: toError(err) });
 });
-
-// x-response-time
-
-app.use(async (ctx, next) => {
-  const start = Date.now();
-  await next();
-  const ms = Date.now() - start;
-  ctx.set('X-Response-Time', `${ms}ms`);
-});
-
-router.get('/health', async (ctx) => {
-  const start = Date.now();
-  const ms = Date.now() - start;
-  ctx.status = 200;
-  ctx.body = {
-    status: 'ok',
-    uptimeMs: ms,
-  };
-});
-
-router.get('/forecast', async (ctx, next) => {
-  // Get the current date
-  let currentDate = new Date();
-  // Set the date to the beginning of the current year
-  let startOfYear = new Date(currentDate.getFullYear(), 0, 1);
-  // Convert to epoch time (in seconds)
-  let epochTimeStartOfYear = Math.floor(startOfYear.getTime() / 1000);
-  // Set the date to the end of the current year
-  let endOfYear = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59);
-  // Convert to epoch time (in seconds)
-  let epochTimeEndOfYear = Math.floor(endOfYear.getTime() / 1000);
-  const data = await MongoRepo.instance
-    .collection<IWeather>($Weather)
-    .find({
-      'location.localtime_epoch': {
-        $gte: epochTimeStartOfYear,
-        $lte: epochTimeEndOfYear,
-      },
-    })
-    .toArray();
-  ctx.status = 200;
-  ctx.body = {
-    data,
-  };
-});
-
-// response
-app.use(router.routes()).use(router.allowedMethods());
-
-app.listen(3000);
