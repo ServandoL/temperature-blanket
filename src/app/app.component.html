@@ -1,4 +1,10 @@
-<div class="flex">
-  <div class="w-14 flex-auto">Hi</div>
-  <div class="w-14 flex-auto">Hey</div>
+<div class="flex justify-center">
+  <div>{{ today | date }}</div>
+</div>
+
+<div class="flex flex-wrap justify-center temperature-blanket">
+  <div *ngFor="let day of response?.history?.data"
+       [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)">
+    {{ day?.forecast?.forecastday?.[0]?.date }}
+  </div>
 </div>

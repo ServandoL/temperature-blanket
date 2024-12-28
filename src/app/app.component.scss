@@ -1,0 +1,76 @@
+.temperature-blanket div {
+  width: 14.28%; /* 100% / 7 days of the week */
+  padding: 10px;
+  margin: 2px;
+  text-align: center;
+  border: 1px solid #ccc;
+  color: white;
+}
+
+.color-105-plus {
+  background-color: rgba(255, 0, 0, 0.50);
+}
+
+.color-100-104 {
+  background-color: rgba(255, 0, 0, 0.75);
+}
+
+.color-95-99 {
+  background-color: rgba(255, 0, 0);
+}
+
+.color-90-94 {
+  background-color: rgba(255, 136, 0, 0.5);
+}
+
+.color-85-89 {
+  background-color: rgba(255, 136, 0, 0.75);
+}
+
+.color-80-84 {
+  background-color: rgb(47, 255, 0, .5);
+}
+
+.color-75-79 {
+  background-color: rgb(47, 255, 0, .75);
+}
+
+.color-70-74 {
+  background-color: rgb(47, 255, 0);
+}
+
+.color-65-69 {
+  background-color: rgba(0, 89, 255, 0.5);
+}
+
+.color-60-64 {
+  background-color: rgba(0, 89, 255, 0.75);
+}
+
+.color-55-59 {
+  background-color: rgba(0, 89, 255, 1);
+}
+
+.color-50-54 {
+  background-color: rgba(0, 187, 255, 0.5);
+}
+
+.color-45-49 {
+  background-color: rgba(0, 187, 255, 0.75);
+}
+
+.color-40-44 {
+  background-color: rgba(0, 187, 255, 1);
+}
+
+.color-35-39 {
+  background-color: rgba(0, 255, 234, 0.5);
+}
+
+.color-30-34 {
+  background-color: rgba(0, 255, 234, 0.75);
+}
+
+.color-29-minus {
+  background-color: rgba(0, 255, 234, 1);
+}

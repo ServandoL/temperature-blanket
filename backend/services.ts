@@ -41,41 +41,40 @@ export async function getForecast(
     throw new GraphQLError(baseResult.statusText);
   }
   const data = (await baseResult.json()) as ForecastItem;
-  const _id = data._id ? new ObjectId(data._id) : new ObjectId();
+  const day = data.current?.last_updated?.slice(0, 10);
   const [error, found] = await to(
     MongoRepo.instance.collection<ForecastItem>($Weather).findOne({
-      _id: _id as any,
+      'current.last_updated': { $regex: day },
     })
   );
   if (error) {
     log.error({ loc, error: toError(error as Error) });
     throw new GraphQLError(error.message);
   }
-  const toInsert: ForecastItem = {
-    _id: _id as any,
-    ...data,
-  };
   if (!found) {
+    const _id = new ObjectId() as any;
     const [error, _] = await to(
-      MongoRepo.instance.collection<ForecastItem>($Weather).insertOne(toInsert)
+      MongoRepo.instance
+        .collection<ForecastItem>($Weather)
+        .insertOne({ _id, ...data })
     );
     if (error) {
       log.error({ loc, error: toError(error as Error) });
       throw new GraphQLError(error.message);
     }
     const out: ForecastResponse = {
-      data: toInsert,
+      data: { _id, ...data },
     };
     return out;
   }
   const [updateError, _] = await to(
     MongoRepo.instance.collection<ForecastItem>($Weather).findOneAndUpdate(
       {
-        _id: _id as any,
+        'current.last_updated': { $regex: day },
       },
       {
         $set: {
-          ...toInsert,
+          ...data,
         },
       }
     )
@@ -85,7 +84,7 @@ export async function getForecast(
     throw new GraphQLError(updateError.message);
   }
   const out: ForecastResponse = {
-    data: toInsert,
+    data: { ...data, ...found },
   };
   return out;
 }

@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "format": "npx prettier --write src",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "generate": "graphql-codegen --config tools/codegen.ts"
   },
   "private": true,
   "dependencies": {
@@ -20,6 +21,9 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "@apollo/client": "^3.12.4",
+    "apollo-angular": "^8.0.0",
+    "graphql": "^16.10.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -28,6 +32,11 @@
     "@angular-devkit/build-angular": "^19.0.6",
     "@angular/cli": "^19.0.6",
     "@angular/compiler-cli": "^19.0.0",
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/near-operation-file-preset": "^3.0.0",
+    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
+    "@graphql-codegen/typescript-operations": "^4.4.0",
     "@tailwindcss/postcss": "^4.0.0-beta.8",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "19.0.2",

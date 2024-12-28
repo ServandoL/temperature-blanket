@@ -1,20 +1,37 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {WeatherApiResponse} from './interfaces';
+import { Apollo } from 'apollo-angular';
+import { GET_FORECAST_QUERY, GET_HISTORY_QUERY } from './queries';
+import {
+  ForecastQuery,
+  ForecastQueryVariables,
+  HistoryQuery,
+  HistoryQueryVariables,
+} from './queries.generated';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WeatherService {
-  private _base= new URL("http://api.weatherapi.com/v1");
-  private _key='83346658b8e94f0092b213822242612';
-  constructor(private _http: HttpClient) { }
+  constructor(private readonly apollo: Apollo) {}
 
-  public getForecast() {
-    const endpoint = this._base.toString() + "/forecast.json";
-    const url = new URL(endpoint);
-    url.searchParams.set("key", this._key);
-    url.searchParams.set("q", "75080");
+  public getHistory(): Observable<HistoryQuery> {
+    return this.apollo
+      .watchQuery<
+        HistoryQuery,
+        HistoryQueryVariables
+      >({ query: GET_HISTORY_QUERY })
+      .valueChanges.pipe(map((data) => data.data));
   }
 
+  public getForecast(
+    variables: ForecastQueryVariables
+  ): Observable<ForecastQuery> {
+    return this.apollo
+      .watchQuery<ForecastQuery, ForecastQueryVariables>({
+        query: GET_FORECAST_QUERY,
+        variables,
+      })
+      .valueChanges.pipe(map((data) => data.data));
+  }
 }

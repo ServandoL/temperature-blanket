@@ -8,6 +8,7 @@ import { ApolloServer } from '@apollo/server';
 import { MongoRepo } from './mongo.js';
 import json from 'koa-json';
 import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
 import { toError } from './utils.js';
 import pino from 'pino';
 import { resolvers } from './resolvers.js';
@@ -33,6 +34,20 @@ export const log = pino();
   await MongoRepo.prepare({ appName: 'blanket-api' });
   await server.start();
 
+  app.use(
+    cors({
+      origin: (ctx) => {
+        const origins = [
+          'https://studio.apollographql.com',
+          'http://localhost:4200',
+        ];
+        const valid = origins.find((url) =>
+          url.includes(ctx.request.header.origin ?? '')
+        );
+        return valid ?? '';
+      },
+    })
+  );
   app.use(json());
   app.use(bodyParser());
   app.use(async (ctx, next) => {
