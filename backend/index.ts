@@ -18,6 +18,7 @@ import { koaMiddleware } from '@as-integrations/koa';
 export const log = pino();
 
 (async () => {
+  const PORT = +(process.env['PORT'] ?? '9001');
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const schemaPath = path.join(__dirname, 'schema.graphql');
   const typeDefs = gql`
@@ -36,16 +37,7 @@ export const log = pino();
 
   app.use(
     cors({
-      origin: (ctx) => {
-        const origins = [
-          'https://studio.apollographql.com',
-          'http://localhost:4200',
-        ];
-        const valid = origins.find((url) =>
-          url.includes(ctx.request.header.origin ?? '')
-        );
-        return valid ?? '';
-      },
+      origin: '*',
     })
   );
   app.use(json());
@@ -89,9 +81,9 @@ export const log = pino();
   });
   app.use(koaMiddleware(server));
   await new Promise<void>((resolve) =>
-    httpServer.listen({ port: 3000 }, resolve)
+    httpServer.listen({ port: PORT }, resolve)
   );
-  log.info({ loc: 'server', message: 'Listening on port 3000' });
+  log.info({ loc: 'server', message: 'Listening on port ' + PORT });
 })().catch((err) => {
   log.error({ loc: 'server', error: toError(err) });
 });
