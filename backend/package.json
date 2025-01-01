@@ -9,7 +9,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "env-cmd node dist/index.js",
     "debug": "npm run generate && npm run build && env-cmd node --loader ts-node/esm index.ts",
-    "generate": "graphql-codegen --config tools/codegen.ts"
+    "generate": "graphql-codegen --config tools/codegen.ts",
+    "cp": "cp schema.graphql dist && cp package.json dist",
+    "dist": "npm run build && npm run cp"
   },
   "author": "",
   "license": "ISC",
