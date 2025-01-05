@@ -1,10 +1,12 @@
-.temperature-blanket div {
-  width: 14.28%; /* 100% / 7 days of the week */
-  padding: 10px;
-  margin: 2px;
-  text-align: center;
-  border: 1px solid #ccc;
-  color: white;
+.temperature-blanket {
+  margin-left: 10%;
+  margin-right: 10%;
+  .day {
+      width: 14.28%; /* 100% / 7 days of the week */
+      padding: 10px;
+      //margin: 1px;
+      text-align: center;
+  }
 }
 
 .color-105-plus {
