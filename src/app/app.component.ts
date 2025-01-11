@@ -18,6 +18,7 @@ export class AppComponent implements OnInit, OnDestroy {
   forecast$: Observable<ForecastQuery>;
   today = new Date();
   response: HistoryQuery | undefined;
+  isTextVisible = true;
 
   constructor(private service: WeatherService) {
     this.history$ = this.service.getHistory();
@@ -53,5 +54,9 @@ export class AppComponent implements OnInit, OnDestroy {
     const lowerBound = Math.floor(temp / 5) * 5;
     const upperBound = lowerBound + 4;
     return `color-${lowerBound}-${upperBound}`;
+  }
+
+  toggleText() {
+    this.isTextVisible = !this.isTextVisible;
   }
 }

@@ -3,8 +3,11 @@
 </div>
 
 <div class="text-amber-100 flex flex-wrap temperature-blanket">
-  <div class="day" *ngFor="let day of response?.history?.data"
-       [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)">
-    {{ day?.forecast?.forecastday?.[0]?.date }}
+  <div class="day clickable" (click)="toggleText()" *ngFor="let day of response?.history?.data"
+       [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
+  >
+    <div [ngClass]="{'hidden': isTextVisible}">
+      {{ day?.forecast?.forecastday?.[0]?.date }}
+    </div>
   </div>
 </div>
