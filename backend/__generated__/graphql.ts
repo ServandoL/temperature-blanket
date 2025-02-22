@@ -145,6 +145,8 @@ export type ForecastDayHour = {
 };
 
 export type ForecastInput = {
+  /** yyyy-mm-dd format */
+  dt?: InputMaybe<Scalars['String']['input']>;
   q: Scalars['String']['input'];
 };
 
@@ -181,12 +183,37 @@ export type HistoryResponse = {
 export type Query = {
   __typename?: 'Query';
   forecast?: Maybe<ForecastResponse>;
+  forecastByDate?: Maybe<ForecastResponse>;
   history?: Maybe<HistoryResponse>;
+  updateMissingDays?: Maybe<UpdateMissingDaysResponse>;
 };
 
 
 export type QueryForecastArgs = {
   input: ForecastInput;
+};
+
+
+export type QueryForecastByDateArgs = {
+  input: ForecastInput;
+};
+
+
+export type QueryUpdateMissingDaysArgs = {
+  input: UpdateMissingDaysInput;
+};
+
+export type UpdateMissingDaysInput = {
+  /** mm format */
+  month: Scalars['Int']['input'];
+  /** yyyy format */
+  year: Scalars['Int']['input'];
+};
+
+export type UpdateMissingDaysResponse = {
+  __typename?: 'UpdateMissingDaysResponse';
+  datesMissing?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  success?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -276,8 +303,11 @@ export type ResolversTypes = ResolversObject<{
   HistoryLocation: ResolverTypeWrapper<HistoryLocation>;
   HistoryResponse: ResolverTypeWrapper<HistoryResponse>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  UpdateMissingDaysInput: UpdateMissingDaysInput;
+  UpdateMissingDaysResponse: ResolverTypeWrapper<UpdateMissingDaysResponse>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -297,8 +327,11 @@ export type ResolversParentTypes = ResolversObject<{
   HistoryLocation: HistoryLocation;
   HistoryResponse: HistoryResponse;
   ID: Scalars['ID']['output'];
+  Int: Scalars['Int']['output'];
   Query: {};
   String: Scalars['String']['output'];
+  UpdateMissingDaysInput: UpdateMissingDaysInput;
+  UpdateMissingDaysResponse: UpdateMissingDaysResponse;
 }>;
 
 export type ForecastResolvers<ContextType = any, ParentType extends ResolversParentTypes['Forecast'] = ResolversParentTypes['Forecast']> = ResolversObject<{
@@ -461,7 +494,15 @@ export type HistoryResponseResolvers<ContextType = any, ParentType extends Resol
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   forecast?: Resolver<Maybe<ResolversTypes['ForecastResponse']>, ParentType, ContextType, RequireFields<QueryForecastArgs, 'input'>>;
+  forecastByDate?: Resolver<Maybe<ResolversTypes['ForecastResponse']>, ParentType, ContextType, RequireFields<QueryForecastByDateArgs, 'input'>>;
   history?: Resolver<Maybe<ResolversTypes['HistoryResponse']>, ParentType, ContextType>;
+  updateMissingDays?: Resolver<Maybe<ResolversTypes['UpdateMissingDaysResponse']>, ParentType, ContextType, RequireFields<QueryUpdateMissingDaysArgs, 'input'>>;
+}>;
+
+export type UpdateMissingDaysResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateMissingDaysResponse'] = ResolversParentTypes['UpdateMissingDaysResponse']> = ResolversObject<{
+  datesMissing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
@@ -477,5 +518,6 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   HistoryLocation?: HistoryLocationResolvers<ContextType>;
   HistoryResponse?: HistoryResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  UpdateMissingDaysResponse?: UpdateMissingDaysResponseResolvers<ContextType>;
 }>;
 

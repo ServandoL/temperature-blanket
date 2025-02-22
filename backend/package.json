@@ -5,17 +5,18 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npx tsc",
+    "build": "npx tsc && cp src/schema.graphql dist/src",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "env-cmd node dist/index.js",
-    "debug": "npm run generate && npm run build && env-cmd node --loader ts-node/esm index.ts",
+    "start": "env-cmd node dist/src/index.js",
+    "debug": "npm run generate && npm run build && env-cmd node --loader ts-node/esm src/index.ts",
     "generate": "graphql-codegen --config tools/codegen.ts",
-    "cp": "cp schema.graphql dist && cp package.json dist",
+    "cp": "cp src/schema.graphql dist && cp package.json dist",
     "dist": "npm run build && npm run cp"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@apollo/datasource-rest": "^6.4.1",
     "@apollo/server": "^4.11.2",
     "@as-integrations/koa": "^1.1.1",
     "@koa/cors": "^5.0.0",
@@ -27,7 +28,6 @@
     "koa-bodyparser": "^4.4.1",
     "koa-json": "^2.0.2",
     "mongodb": "^6.12.0",
-    "node-fetch": "^3.3.2",
     "pino": "^9.6.0"
   },
   "devDependencies": {

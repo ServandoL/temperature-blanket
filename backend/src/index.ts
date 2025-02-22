@@ -14,6 +14,8 @@ import pino from 'pino';
 import { resolvers } from './resolvers.js';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { koaMiddleware } from '@as-integrations/koa';
+import { ForecastDatasource } from './datasource/ForecastDatasource.js';
+import { AppContext } from './interfaces.js';
 
 export const log = pino();
 
@@ -26,7 +28,7 @@ export const log = pino();
   `;
   const app = new Koa();
   const httpServer = http.createServer(app.callback());
-  const server = new ApolloServer({
+  const server = new ApolloServer<AppContext>({
     typeDefs,
     resolvers,
     introspection: process.env['INTROSPECTION'] === 'true',
@@ -79,7 +81,15 @@ export const log = pino();
       log.info({ loc: 'server.koa.response', body: ctx.response.body });
     }
   });
-  app.use(koaMiddleware(server));
+  app.use(
+    koaMiddleware(server, {
+      context: async () => {
+        return {
+          dataSources: { forecast: new ForecastDatasource() },
+        };
+      },
+    })
+  );
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: PORT }, resolve)
   );

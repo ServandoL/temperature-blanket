@@ -1,10 +1,26 @@
 type Query {
   history: HistoryResponse
   forecast(input: ForecastInput!): ForecastResponse
+  updateMissingDays(input: UpdateMissingDaysInput!): UpdateMissingDaysResponse
+  forecastByDate(input: ForecastInput!): ForecastResponse
+}
+
+input UpdateMissingDaysInput {
+  """mm format"""
+  month: Int!
+  """yyyy format"""
+  year: Int!
+}
+
+type UpdateMissingDaysResponse {
+  success: Boolean
+  datesMissing: [String]
 }
 
 input ForecastInput {
   q: String!
+  """yyyy-mm-dd format"""
+  dt: String
 }
 type ForecastResponse {
   data: ForecastItem
