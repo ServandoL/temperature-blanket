@@ -1,24 +1,32 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { WeatherService } from './common/weather.service';
-import { concatMap, map, Observable, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  concatMap,
+  map,
+  Observable,
+  Subscription,
+} from 'rxjs';
 import { ForecastQuery, HistoryQuery } from './common/queries.generated';
-import { DatePipe, NgClass, NgForOf } from '@angular/common';
+import {AsyncPipe, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   providers: [WeatherService],
-  imports: [DatePipe, NgForOf, NgClass],
+  imports: [DatePipe, NgForOf, NgClass, NgIf, AsyncPipe],
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'temperature-blanket';
   private _subs: Subscription[] = [];
-  history$: Observable<HistoryQuery>;
-  forecast$: Observable<ForecastQuery>;
+  history$: Observable<HistoryQuery | HttpErrorResponse>;
+  forecast$: Observable<ForecastQuery | HttpErrorResponse>;
   today = new Date();
   response: HistoryQuery | undefined;
   isTextVisible = true;
+  error$ = new BehaviorSubject<HttpErrorResponse | undefined>(undefined);
 
   constructor(private service: WeatherService) {
     this.history$ = this.service.getHistory();
@@ -39,7 +47,11 @@ export class AppComponent implements OnInit, OnDestroy {
           })
         )
         .subscribe(({ forecast, history }) => {
-          this.response = history;
+          if (history.hasOwnProperty('error')) {
+            this.error$.next(history as HttpErrorResponse);
+          } else {
+            this.response = history as ForecastQuery;
+          }
         })
     );
   }

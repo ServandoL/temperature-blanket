@@ -7,7 +7,8 @@ import {
   HistoryQuery,
   HistoryQueryVariables,
 } from './queries.generated';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -15,23 +16,43 @@ import { map, Observable } from 'rxjs';
 export class WeatherService {
   constructor(private readonly apollo: Apollo) {}
 
-  public getHistory(): Observable<HistoryQuery> {
+  public getHistory(): Observable<HistoryQuery | HttpErrorResponse> {
     return this.apollo
       .watchQuery<
         HistoryQuery,
         HistoryQueryVariables
       >({ query: GET_HISTORY_QUERY })
-      .valueChanges.pipe(map((data) => data.data));
+      .valueChanges.pipe(
+        map((data) => data.data),
+        catchError((err) => {
+          console.error(err);
+          return of(
+            new HttpErrorResponse({
+              error: err,
+            })
+          );
+        })
+      );
   }
 
   public getForecast(
     variables: ForecastQueryVariables
-  ): Observable<ForecastQuery> {
+  ): Observable<ForecastQuery | HttpErrorResponse> {
     return this.apollo
       .watchQuery<ForecastQuery, ForecastQueryVariables>({
         query: GET_FORECAST_QUERY,
         variables,
       })
-      .valueChanges.pipe(map((data) => data.data));
+      .valueChanges.pipe(
+        map((data) => data.data),
+        catchError((err) => {
+          console.error(err);
+          return of(
+            new HttpErrorResponse({
+              error: err,
+            })
+          );
+        })
+      );
   }
 }
