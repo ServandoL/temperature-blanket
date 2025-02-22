@@ -12,12 +12,12 @@ import { log } from '../index.js';
 import { toError } from '../utils.js';
 import { MongoRepo } from '../mongo.js';
 import { $Weather } from '../common.js';
-import { ObjectId, Document, AnyBulkWriteOperation } from 'mongodb';
+import { ObjectId, Document, AnyBulkWriteOperation, Filter } from 'mongodb';
 import { GraphQLError } from 'graphql';
 import { UpdateMissingDaysAggregateResponse } from '../interfaces';
 
 export class ForecastDatasource extends RESTDataSource {
-  override baseURL = 'http://api.weatherapi.com/v1/forecast.json';
+  override baseURL = 'http://api.weatherapi.com/v1/';
   private readonly key;
 
   constructor() {
@@ -97,7 +97,7 @@ export class ForecastDatasource extends RESTDataSource {
       if (!v) missing.push(k);
     }
     const promises = missing.map((date) =>
-      this.getForecastByDate({
+      this.getForecastHistoryByDate({
         q: '75080',
         dt: date,
       })
@@ -152,14 +152,14 @@ export class ForecastDatasource extends RESTDataSource {
     }
   }
 
-  async getForecastByDate(
+  async getForecastHistoryByDate(
     input: ForecastInput
   ): Promise<ForecastItem | undefined> {
-    const loc = ForecastDatasource.name + '.getForecastByDate';
+    const loc = ForecastDatasource.name + '.getForecastHistoryByDate';
     if (!input.dt) {
       throw new GraphQLError('Input dt is required.');
     }
-    const params = `?q=${input.q}&key=${this.key}&dt=${input.dt}`;
+    const params = `history.json?q=${input.q}&key=${this.key}&dt=${input.dt}`;
     const [baseError, baseResult] = await to(this.get<ForecastItem>(params));
     if (baseError) {
       console.error({ loc, ...toError(baseError) });
@@ -186,7 +186,7 @@ export class ForecastDatasource extends RESTDataSource {
 
   async getForecast(input: ForecastInput): Promise<ForecastResponse> {
     const loc = ForecastDatasource.name + '.getForecast';
-    const params = `?q=${input.q}&key=${this.key}`;
+    const params = `forecast.json?q=${input.q}&key=${this.key}`;
     const [baseError, baseResult] = await to(this.get<ForecastItem>(params));
     if (baseError) {
       log.error({ loc, ...toError(baseError as Error) });
@@ -245,6 +245,7 @@ export class ForecastDatasource extends RESTDataSource {
   }
 
   async getForecastHistory(): Promise<HistoryResponse> {
+    const loc = ForecastDatasource.name + '.getForecastHistory';
     // Get the current date
     let currentDate = new Date();
     // Set the date to the beginning of the current year
@@ -255,14 +256,17 @@ export class ForecastDatasource extends RESTDataSource {
     let endOfYear = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59);
     // Convert to epoch time (in seconds)
     let epochTimeEndOfYear = Math.floor(endOfYear.getTime() / 1000);
+    const query: Filter<ForecastItem> = {
+      'location.localtime_epoch': {
+        $gte: epochTimeStartOfYear,
+        $lte: epochTimeEndOfYear,
+      },
+    };
+    log.info({ loc, query });
     const data = await MongoRepo.instance
       .collection<ForecastItem>($Weather)
-      .find({
-        'location.localtime_epoch': {
-          $gte: epochTimeStartOfYear,
-          $lte: epochTimeEndOfYear,
-        },
-      })
+      .find(query)
+      .sort({ 'forecast.forecastday.date': 1 })
       .toArray();
     const out: HistoryResponse = {
       data,

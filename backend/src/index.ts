@@ -9,7 +9,7 @@ import { MongoRepo } from './mongo.js';
 import json from 'koa-json';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
-import { toError } from './utils.js';
+import {shouldTraceHeaders, toError} from './utils.js';
 import pino from 'pino';
 import { resolvers } from './resolvers.js';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
@@ -70,9 +70,7 @@ export const log = pino();
     const headers = {
       ...JSON.parse(JSON.stringify({ ...ctx.request.headers })),
     };
-    const toTrace = !ctx.request.URL.pathname
-      .toLowerCase()
-      .startsWith('/health');
+    const toTrace = shouldTraceHeaders(ctx);
     if (toTrace) {
       log.info({ loc: 'server.koa.request', headers, body: ctx.request.body });
     }

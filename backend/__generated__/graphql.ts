@@ -183,7 +183,7 @@ export type HistoryResponse = {
 export type Query = {
   __typename?: 'Query';
   forecast?: Maybe<ForecastResponse>;
-  forecastByDate?: Maybe<ForecastResponse>;
+  forecastHistoryByDate?: Maybe<ForecastResponse>;
   history?: Maybe<HistoryResponse>;
   updateMissingDays?: Maybe<UpdateMissingDaysResponse>;
 };
@@ -194,7 +194,7 @@ export type QueryForecastArgs = {
 };
 
 
-export type QueryForecastByDateArgs = {
+export type QueryForecastHistoryByDateArgs = {
   input: ForecastInput;
 };
 
@@ -494,7 +494,7 @@ export type HistoryResponseResolvers<ContextType = any, ParentType extends Resol
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   forecast?: Resolver<Maybe<ResolversTypes['ForecastResponse']>, ParentType, ContextType, RequireFields<QueryForecastArgs, 'input'>>;
-  forecastByDate?: Resolver<Maybe<ResolversTypes['ForecastResponse']>, ParentType, ContextType, RequireFields<QueryForecastByDateArgs, 'input'>>;
+  forecastHistoryByDate?: Resolver<Maybe<ResolversTypes['ForecastResponse']>, ParentType, ContextType, RequireFields<QueryForecastHistoryByDateArgs, 'input'>>;
   history?: Resolver<Maybe<ResolversTypes['HistoryResponse']>, ParentType, ContextType>;
   updateMissingDays?: Resolver<Maybe<ResolversTypes['UpdateMissingDaysResponse']>, ParentType, ContextType, RequireFields<QueryUpdateMissingDaysArgs, 'input'>>;
 }>;

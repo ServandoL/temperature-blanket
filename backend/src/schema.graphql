@@ -2,7 +2,7 @@ type Query {
   history: HistoryResponse
   forecast(input: ForecastInput!): ForecastResponse
   updateMissingDays(input: UpdateMissingDaysInput!): UpdateMissingDaysResponse
-  forecastByDate(input: ForecastInput!): ForecastResponse
+  forecastHistoryByDate(input: ForecastInput!): ForecastResponse
 }
 
 input UpdateMissingDaysInput {
