@@ -1,83 +1,156 @@
+@use 'sass:color';
+
 .temperature-blanket {
   margin-left: 10%;
   margin-right: 10%;
+
   .day {
-      width: 14.28%; /* 100% / 7 days of the week */
-      padding: 10px;
-      //margin: 1px;
-      text-align: center;
+    width: 14.28%; /* 100% / 7 days of the week */
+    padding: 10px;
+    text-align: center;
   }
+
   .clickable {
     cursor: pointer;
   }
+
   .hidden {
     display: none;
   }
 }
+
 .color-105-plus {
   background-color: rgba(255, 0, 0, 0.50);
+
+  p {
+    color: color.mix(rgba(255, 0, 0, 0.50), black, 50%)
+  }
 }
 
 .color-100-104 {
   background-color: rgba(255, 0, 0, 0.75);
+
+  p {
+    color: color.mix(rgba(255, 0, 0, 0.75), black, 50%)
+  }
 }
 
 .color-95-99 {
   background-color: rgba(255, 0, 0);
+
+  p {
+    color: color.mix(rgba(255, 0, 0), black, 50%)
+  }
 }
 
 .color-90-94 {
   background-color: rgba(255, 136, 0, 0.5);
+
+  p {
+    color: color.mix(rgba(255, 136, 0, 0.5), black, 50%)
+  }
 }
 
 .color-85-89 {
   background-color: rgba(255, 136, 0, 0.75);
+
+  p {
+    color: color.mix(rgba(255, 136, 0, 0.75), black, 50%)
+  }
 }
 
 .color-80-84 {
-  background-color: rgb(47, 255, 0, .5);
+  background-color: rgba(47, 255, 0, .5);
+
+  p {
+    color: color.mix(rgba(47, 255, 0, .5), black, 50%)
+  }
 }
 
 .color-75-79 {
   background-color: rgb(47, 255, 0, .75);
+
+  p {
+    color: color.mix(rgba(47, 255, 0, .75), black, 50%)
+  }
 }
 
 .color-70-74 {
-  background-color: rgb(47, 255, 0);
+  background-color: rgb(47, 255, 0, .5);
+
+  p {
+    color: color.mix(rgba(47, 255, 0, 0.50), black, 50%)
+  }
 }
 
 .color-65-69 {
   background-color: rgba(0, 89, 255, 0.5);
+
+  p {
+    color: color.mix(rgba(0, 89, 255, 0.50), black, 50%)
+  }
 }
 
 .color-60-64 {
   background-color: rgba(0, 89, 255, 0.75);
+
+  p {
+    color: color.mix(rgba(0, 89, 255, 0.75), black, 50%)
+  }
 }
 
 .color-55-59 {
   background-color: rgba(0, 89, 255, 1);
+
+  p {
+    color: color.mix(rgba(0, 89, 255, 1), black, 50%)
+  }
 }
 
 .color-50-54 {
   background-color: rgba(0, 187, 255, 0.5);
+
+  p {
+    color: color.mix(rgba(0, 187, 255, 0.50), black, 50%)
+  }
 }
 
 .color-45-49 {
   background-color: rgba(0, 187, 255, 0.75);
+
+  p {
+    color: color.mix(rgba(0, 187, 255, 0.75), black, 50%)
+  }
 }
 
 .color-40-44 {
   background-color: rgba(0, 187, 255, 1);
+
+  p {
+    color: color.mix(rgba(0, 187, 255, 1), black, 50%)
+  }
 }
 
 .color-35-39 {
   background-color: rgba(0, 255, 234, 0.5);
+
+  p {
+    color: color.mix(rgba(0, 255, 234, 0.50), black, 50%)
+  }
 }
 
 .color-30-34 {
   background-color: rgba(0, 255, 234, 0.75);
+
+  p {
+    color: color.mix(rgba(0, 255, 234, 0.75), black, 50%)
+  }
 }
 
 .color-29-minus {
   background-color: rgba(0, 255, 234, 1);
+
+  p {
+    color: color.mix(rgba(0, 255, 234, 1), black, 50%)
+  }
 }

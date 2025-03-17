@@ -7,9 +7,10 @@
        [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
   >
     <div [ngClass]="{'hidden': isTextVisible}">
-      {{ day?.forecast?.forecastday?.[0]?.date }}
+      <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
+      <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
     </div>
   </div>
-  <div class="outline accent-red-400" *ngIf="error$|async">{{error$.getValue()?.error}}</div>
+  <div class="outline accent-red-400" *ngIf="error$|async">{{ error$.getValue()?.error }}</div>
 </div>
 
