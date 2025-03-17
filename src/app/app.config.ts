@@ -11,6 +11,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { apolloInterceptorInterceptor } from './common/apollo-interceptor.interceptor';
 import { loggerInterceptorInterceptor } from './common/logger-interceptor.interceptor';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,7 +26,7 @@ export const appConfig: ApplicationConfig = {
     provideApollo(() => {
       const httpLink = inject(HttpLink);
       return {
-        link: httpLink.create({ uri: 'http://localhost:9001/graphql' }),
+        link: httpLink.create({ uri: environment.graphqlUrl }),
         cache: new InMemoryCache(),
         // other options...
       };
