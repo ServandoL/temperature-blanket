@@ -21,7 +21,7 @@ export class WeatherService {
       .watchQuery<
         HistoryQuery,
         HistoryQueryVariables
-      >({ query: GET_HISTORY_QUERY })
+      >({ query: GET_HISTORY_QUERY, fetchPolicy: 'no-cache' })
       .valueChanges.pipe(
         map((data) => data.data),
         catchError((err) => {
@@ -42,6 +42,7 @@ export class WeatherService {
       .watchQuery<ForecastQuery, ForecastQueryVariables>({
         query: GET_FORECAST_QUERY,
         variables,
+        fetchPolicy: 'no-cache'
       })
       .valueChanges.pipe(
         map((data) => data.data),
