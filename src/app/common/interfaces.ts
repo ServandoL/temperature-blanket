@@ -36,3 +36,22 @@ export interface ILocation {
   localtime_epoch: number;
   localtime: string;
 }
+
+export interface AppFlagsResponse {
+  appName: string;
+  flags: FlagDescription[];
+}
+
+export interface FlagDescription {
+  name: string;
+  enabled: boolean;
+}
+
+
+export enum PublishEvents {
+  FLAG = 'flag'
+}
+
+export enum Flags {
+  APP_BLANKET = 'App-blanket'
+}

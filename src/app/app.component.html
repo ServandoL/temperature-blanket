@@ -1,40 +1,51 @@
-@if (!(loading$|async)) {
+@if (($appFlag|async)?.enabled === true) {
 
-  <div class="flex flex-col justify-center text-amber-100">
-    <div class="flex flex-row justify-center m-2">
-      <div class="flex flex-row justify-evenly w-[250px]">
-        <div>{{ today | date }}</div>
-        <div class="flex justify-center cursor-pointer refresh w-[40px]" (click)="refresh()">
-          <img alt="refresh" ngSrc="/assets/refresh-svgrepo-com.svg" width="25" height="25"/>
-        </div>
-      </div>
-    </div>
+  @if (!(loading$|async)) {
 
-    <div class="text-amber-100 flex flex-wrap temperature-blanket">
-      <div class="day clickable" (click)="toggleText()" *ngFor="let day of response?.history?.data"
-           [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
-      >
-        <div [ngClass]="{'hidden': isTextVisible}">
-          <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
-          <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
-        </div>
-      </div>
-      <div class="outline accent-red-400" *ngIf="error$|async">{{ error$.getValue()?.error }}</div>
-    </div>
-  </div>
-} @else {
-  <div class="mx-auto w-full max-w-sm rounded-md border border-blue-300 p-4 m-4">
-    <div class="flex animate-pulse space-x-4">
-      <div class="flex-1 space-y-6 py-1">
-        <div class="h-2 rounded bg-gray-200"></div>
-        <div class="space-y-3">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="col-span-2 h-2 rounded bg-gray-200"></div>
-            <div class="col-span-1 h-2 rounded bg-gray-200"></div>
+    <div class="flex flex-col justify-center text-amber-100">
+      <div class="flex flex-row justify-center m-2">
+        <div class="flex flex-row justify-evenly w-[250px]">
+          <div>{{ today | date }}</div>
+          <div class="flex justify-center cursor-pointer refresh w-[40px]" (click)="refresh()">
+            <img alt="refresh" ngSrc="/assets/refresh-svgrepo-com.svg" width="25" height="25"/>
           </div>
-          <div class="h-2 rounded bg-gray-200"></div>
         </div>
       </div>
+
+      <div class="text-amber-100 flex flex-wrap temperature-blanket">
+        <div class="day clickable" (click)="toggleText()" *ngFor="let day of response?.history?.data"
+             [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
+        >
+          <div [ngClass]="{'hidden': isTextVisible}">
+            <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
+            <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
+          </div>
+        </div>
+        <div class="outline accent-red-400" *ngIf="error$|async">{{ error$.getValue()?.error }}</div>
+      </div>
+    </div>
+  } @else {
+    <div class="mx-auto w-full max-w-sm rounded-md border border-blue-300 p-4 m-4">
+      <div class="flex animate-pulse space-x-4">
+        <div class="flex-1 space-y-6 py-1">
+          <div class="h-2 rounded bg-gray-200"></div>
+          <div class="space-y-3">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-2 h-2 rounded bg-gray-200"></div>
+              <div class="col-span-1 h-2 rounded bg-gray-200"></div>
+            </div>
+            <div class="h-2 rounded bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+} @else {
+  <div class="unauthorized flex flex-row justify-center items-center py-5">
+    <div class="unauthorized-text">
+      <h1 class="text-2xl">Unauthorized</h1>
+      <p class="text-sm">Feature flags are disabled for this app.</p>
     </div>
   </div>
 }

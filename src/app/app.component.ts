@@ -2,12 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { WeatherService } from './common/weather.service';
 import {
   BehaviorSubject,
-  concatMap,
   delay,
   map,
   Observable,
   Subject,
-  Subscription,
   switchMap,
   takeUntil,
   tap,
@@ -23,6 +21,8 @@ import {
 } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { FeatureFlagService } from './common/feature-flag.service';
+import { FlagDescription, Flags } from './common/interfaces';
 
 @Component({
   selector: 'app-root',
@@ -42,15 +42,25 @@ export class AppComponent implements OnInit, OnDestroy {
   isTextVisible = true;
   error$ = new BehaviorSubject<HttpErrorResponse | undefined>(undefined);
   loading$ = new BehaviorSubject<boolean>(false);
+  featureFlags$: Observable<FlagDescription[]>;
+  $appFlag: Observable<FlagDescription | null>;
 
-  constructor(private service: WeatherService) {
+  constructor(
+    private service: WeatherService,
+    private featureFlagService: FeatureFlagService
+  ) {
     this.history$ = this.service.getHistory();
     this.forecast$ = this.service.getForecast({
       input: { q: environment.zipCode },
     });
+    this.featureFlags$ = this.featureFlagService.featureFlags$;
+    this.$appFlag = this.featureFlagService.getFlagFor(Flags.APP_BLANKET);
   }
 
   ngOnInit() {
+    this.featureFlags$.pipe(takeUntil(this.onDestroy$)).subscribe((flags) => {
+      console.log({ location: 'AppComponent.ngOnInit', message: flags });
+    });
     this.fetch$
       .pipe(
         takeUntil(this.onDestroy$),
