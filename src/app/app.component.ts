@@ -92,6 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   refresh() {
+    this.today = new Date();
     this.fetch$.next(Date.now());
   }
 
