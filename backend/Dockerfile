@@ -12,5 +12,5 @@ WORKDIR /usr/share/app
 COPY --from=build /app/dist .
 COPY --from=build /app/node_modules ./node_modules
 ENV NODE_ENV=production
-EXPOSE 9001
+EXPOSE 8080
 ENTRYPOINT ["node", "/usr/share/app/src/index.js"]

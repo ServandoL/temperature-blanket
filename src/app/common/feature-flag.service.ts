@@ -2,40 +2,56 @@ import { inject, Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, catchError, map, Observable, of, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { AppFlagsResponse, FlagDescription, Flags, PublishEvents } from './interfaces';
+import {
+  AppFlagsResponse,
+  FlagDescription,
+  Flags,
+  PublishEvents,
+} from './interfaces';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FeatureFlagService {
-  private _socket: Socket;
+  private readonly _defaultFlag = {
+    name: 'App-blanket',
+    enabled: true,
+  };
+  private _socket: Socket | undefined;
   private _http = inject(HttpClient);
   private _featureFlags = new BehaviorSubject<FlagDescription[]>([]);
 
   constructor() {
-    this._socket = io('http://localhost:3000?room=temperature-blanket');
-    this._socket.on('connect', () => {
-      console.log({
-        location: FeatureFlagService.name + '.connect',
-        message: 'Connected to server',
+    if (environment.enableFeaturesFlags) {
+      this._socket = io('http://localhost:3000?room=temperature-blanket');
+      this._socket.on('connect', () => {
+        console.log({
+          location: FeatureFlagService.name + '.connect',
+          message: 'Connected to server',
+        });
       });
-    });
-    this._socket.on('disconnect', () => {
-      console.warn({
-        location: FeatureFlagService.name + '.disconnect',
-        message: 'Disconnected from server',
+      this._socket.on('disconnect', () => {
+        console.warn({
+          location: FeatureFlagService.name + '.disconnect',
+          message: 'Disconnected from server',
+        });
       });
-    });
-    this._socket.on(PublishEvents.FLAG, (flag: FlagDescription) => {
-      console.log({
-        location: FeatureFlagService.name + '.socket.on',
-        message: flag,
+      this._socket.on(PublishEvents.FLAG, (flag: FlagDescription) => {
+        console.log({
+          location: FeatureFlagService.name + '.socket.on',
+          message: flag,
+        });
+        this._featureFlags.next(
+          this._featureFlags
+            .getValue()
+            .map((f) => (f.name === flag.name ? flag : f))
+        );
       });
-      this._featureFlags.next(
-        this._featureFlags.getValue().map((f) => (f.name === flag.name ? flag : f))
-      );
-    });
-    this.initializeFlags();
+      this.initializeFlags();
+    } else {
+      this._featureFlags.next([this._defaultFlag]);
+    }
   }
 
   private initializeFlags() {
