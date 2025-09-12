@@ -1,4 +1,4 @@
-import {gql} from 'graphql-tag';
+import { gql } from 'graphql-tag';
 
 export const GET_FORECAST_QUERY = gql`
   query Forecast($input: ForecastInput!) {
@@ -17,7 +17,7 @@ export const GET_FORECAST_QUERY = gql`
       }
     }
   }
-`
+`;
 export const GET_HISTORY_QUERY = gql`
   query History {
     history {
@@ -35,4 +35,13 @@ export const GET_HISTORY_QUERY = gql`
       }
     }
   }
-`
+`;
+
+export const MISSING_DAYS_QUERY = gql`
+  query UpdateMissingDays($input: UpdateMissingDaysInput!) {
+    updateMissingDays(input: $input) {
+      success
+      datesMissing
+    }
+  }
+`;

@@ -7,6 +7,7 @@ import {
   Observable,
   Subject,
   switchMap,
+  take,
   takeUntil,
   tap,
 } from 'rxjs';
@@ -23,13 +24,22 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { FeatureFlagService } from './common/feature-flag.service';
 import { FlagDescription, Flags } from './common/interfaces';
+import { MissingDaysPipe } from './common/missing-days.pipe';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   providers: [WeatherService],
-  imports: [DatePipe, NgForOf, NgClass, NgIf, AsyncPipe, NgOptimizedImage],
+  imports: [
+    DatePipe,
+    NgForOf,
+    NgClass,
+    NgIf,
+    AsyncPipe,
+    NgOptimizedImage,
+    MissingDaysPipe,
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'temperature-blanket';
@@ -44,6 +54,7 @@ export class AppComponent implements OnInit, OnDestroy {
   loading$ = new BehaviorSubject<boolean>(false);
   featureFlags$: Observable<FlagDescription[]>;
   $appFlag: Observable<FlagDescription | null>;
+  missingDays$ = new BehaviorSubject<string[]>([]);
 
   constructor(
     private service: WeatherService,
@@ -91,7 +102,24 @@ export class AppComponent implements OnInit, OnDestroy {
     this.fetch$.next(Date.now());
   }
 
+  updateMissingDays() {
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    this.service
+      .getMissingDays({
+        month,
+        year,
+      })
+      .pipe(take(1), delay(1000))
+      .subscribe((result) => {
+        this.refresh();
+        this.missingDays$.next((result?.datesMissing as string[]) ?? []);
+      });
+  }
+
   refresh() {
+    this.missingDays$.next([]);
     this.today = new Date();
     this.fetch$.next(Date.now());
   }

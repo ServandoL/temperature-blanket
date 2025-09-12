@@ -2,14 +2,24 @@
 
   @if (!(loading$|async)) {
 
-    <div class="flex flex-col justify-center text-amber-100">
+    <div class="flex flex-col gap-2 justify-center text-amber-100">
       <div class="flex flex-row justify-center m-2">
-        <div class="flex flex-row justify-evenly w-[250px]">
+        <div class="flex flex-row justify-between w-full max-w-sm items-center">
           <div>{{ today | date }}</div>
-          <div class="flex justify-center cursor-pointer refresh w-[40px]" (click)="refresh()">
+          <div class="flex justify-center cursor-pointer refresh " (click)="refresh()">
             <img alt="refresh" ngSrc="/assets/refresh-svgrepo-com.svg" width="25" height="25"/>
           </div>
+          <div class="flex">
+            <button class="update-missing-btn rounded-2xl cursor-pointer p-1" type="button"
+                    (click)="updateMissingDays()">Update Missing
+            </button>
+          </div>
         </div>
+      </div>
+      <div *ngIf="(missingDays$|async)?.length"
+           class="missing-days-list flex rounded-2xl justify-center items-center mx-5 p-1">Updated missing days: {{
+          (missingDays$|async) ?? [] | missingDays
+        }}
       </div>
 
       <div class="text-amber-100 flex flex-wrap temperature-blanket">

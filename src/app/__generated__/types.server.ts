@@ -143,6 +143,8 @@ export type ForecastDayHour = {
 };
 
 export type ForecastInput = {
+  /** yyyy-mm-dd format */
+  dt?: InputMaybe<Scalars['String']['input']>;
   q: Scalars['String']['input'];
 };
 
@@ -179,10 +181,35 @@ export type HistoryResponse = {
 export type Query = {
   __typename?: 'Query';
   forecast?: Maybe<ForecastResponse>;
+  forecastHistoryByDate?: Maybe<ForecastResponse>;
   history?: Maybe<HistoryResponse>;
+  updateMissingDays?: Maybe<UpdateMissingDaysResponse>;
 };
 
 
 export type QueryForecastArgs = {
   input: ForecastInput;
+};
+
+
+export type QueryForecastHistoryByDateArgs = {
+  input: ForecastInput;
+};
+
+
+export type QueryUpdateMissingDaysArgs = {
+  input: UpdateMissingDaysInput;
+};
+
+export type UpdateMissingDaysInput = {
+  /** mm format */
+  month: Scalars['Int']['input'];
+  /** yyyy format */
+  year: Scalars['Int']['input'];
+};
+
+export type UpdateMissingDaysResponse = {
+  __typename?: 'UpdateMissingDaysResponse';
+  datesMissing?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  success?: Maybe<Scalars['Boolean']['output']>;
 };

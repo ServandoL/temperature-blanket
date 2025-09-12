@@ -1,7 +1,7 @@
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
-  schema: 'backend/schema.graphql',
+  schema: 'backend/src/schema.graphql',
   /**
    * glob expression to your .graphql or .ts files with your query/mutation/sub
    * CHANGE TO YOUR USE CASE
