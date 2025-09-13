@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "ng": "ng",
-    "ci": "npm run build && bash ./docker-build.sh",
+    "ci": "npm run build && xcopy .\\dist\\temperature-blanket\\browser\\* C:\\devtools\\nginx-1.29.1\\html\\temperature-blanket\\ /E /I /Y",
     "start": "ng serve -o --port 4201",
     "build": "ng build --configuration production",
     "watch": "ng build && --watch --configuration development",
