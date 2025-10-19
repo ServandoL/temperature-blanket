@@ -1,14 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { WeatherService } from './common/weather.service';
 import {
   BehaviorSubject,
   delay,
   map,
   Observable,
-  Subject,
   switchMap,
   take,
-  takeUntil,
   tap,
 } from 'rxjs';
 import { ForecastQuery, HistoryQuery } from './common/queries.generated';
@@ -16,7 +14,6 @@ import {
   AsyncPipe,
   DatePipe,
   NgClass,
-  NgForOf,
   NgIf,
   NgOptimizedImage,
 } from '@angular/common';
@@ -25,6 +22,7 @@ import { environment } from '../environments/environment';
 import { FeatureFlagService } from './common/feature-flag.service';
 import { FlagDescription, Flags } from './common/interfaces';
 import { MissingDaysPipe } from './common/missing-days.pipe';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -33,7 +31,6 @@ import { MissingDaysPipe } from './common/missing-days.pipe';
   providers: [WeatherService],
   imports: [
     DatePipe,
-    NgForOf,
     NgClass,
     NgIf,
     AsyncPipe,
@@ -41,44 +38,51 @@ import { MissingDaysPipe } from './common/missing-days.pipe';
     MissingDaysPipe,
   ],
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'temperature-blanket';
-  private onDestroy$ = new Subject<void>();
-  private fetch$ = new BehaviorSubject<number>(0);
   history$: Observable<HistoryQuery | HttpErrorResponse>;
   forecast$: Observable<ForecastQuery | HttpErrorResponse>;
-  today = new Date();
-  response: HistoryQuery | undefined;
-  isTextVisible = true;
-  error$ = new BehaviorSubject<HttpErrorResponse | undefined>(undefined);
-  loading$ = new BehaviorSubject<boolean>(false);
+  today = signal<Date>(new Date());
+  response = signal<HistoryQuery | undefined>(undefined);
+  isTextVisible = signal<boolean>(true);
+  apiError = signal<HttpErrorResponse | undefined>(undefined);
+  loading = signal<boolean>(false);
   featureFlags$: Observable<FlagDescription[]>;
   $appFlag: Observable<FlagDescription | null>;
-  missingDays$ = new BehaviorSubject<string[]>([]);
+  missingDays = signal<string[]>([]);
+  private fetch$ = new BehaviorSubject<number>(0);
+  private _service = inject(WeatherService);
+  private _featureFlagService = inject(FeatureFlagService);
+  private _destroy = inject(DestroyRef);
 
-  constructor(
-    private service: WeatherService,
-    private featureFlagService: FeatureFlagService
-  ) {
-    this.history$ = this.service.getHistory();
-    this.forecast$ = this.service.getForecast({
-      input: { q: environment.zipCode },
-    });
-    this.featureFlags$ = this.featureFlagService.featureFlags$;
-    this.$appFlag = this.featureFlagService.getFlagFor(Flags.APP_BLANKET);
+  constructor() {
+    this.history$ = this._service.getHistory().pipe(takeUntilDestroyed());
+    this.forecast$ = this._service
+      .getForecast({
+        input: { q: environment.zipCode },
+      })
+      .pipe(takeUntilDestroyed());
+    this.featureFlags$ =
+      this._featureFlagService.featureFlags$.pipe(takeUntilDestroyed());
+    this.$appFlag = this._featureFlagService
+      .getFlagFor(Flags.APP_BLANKET)
+      .pipe(takeUntilDestroyed());
   }
 
   ngOnInit() {
-    this.featureFlags$.pipe(takeUntil(this.onDestroy$)).subscribe((flags) => {
-      console.log({ location: 'AppComponent.ngOnInit', message: flags });
-    });
+    this.featureFlags$
+      .pipe(takeUntilDestroyed(this._destroy))
+      .subscribe((flags) => {
+        console.log({ location: 'AppComponent.ngOnInit', message: flags });
+      });
     this.fetch$
       .pipe(
-        takeUntil(this.onDestroy$),
-        tap(() => this.loading$.next(true)),
+        takeUntilDestroyed(this._destroy),
+        tap(() => this.loading.set(true)),
         delay(250),
         switchMap(() => {
           return this.forecast$.pipe(
+            takeUntilDestroyed(this._destroy),
             switchMap((forecast) =>
               this.history$.pipe(
                 map((history) => ({
@@ -90,11 +94,11 @@ export class AppComponent implements OnInit, OnDestroy {
           );
         }),
         map(({ forecast, history }) => {
-          this.loading$.next(false);
+          this.loading.set(false);
           if (history.hasOwnProperty('error')) {
-            this.error$.next(history as HttpErrorResponse);
+            this.apiError.set(history as HttpErrorResponse);
           } else {
-            this.response = history as ForecastQuery;
+            this.response.set(history as ForecastQuery);
           }
         })
       )
@@ -106,7 +110,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const today = new Date();
     const month = today.getMonth() + 1;
     const year = today.getFullYear();
-    this.service
+    this._service
       .getMissingDays({
         month,
         year,
@@ -114,19 +118,14 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(take(1), delay(1000))
       .subscribe((result) => {
         this.refresh();
-        this.missingDays$.next((result?.datesMissing as string[]) ?? []);
+        this.missingDays.set((result?.datesMissing as string[]) ?? []);
       });
   }
 
   refresh() {
-    this.missingDays$.next([]);
-    this.today = new Date();
+    this.missingDays.set([]);
+    this.today.set(new Date());
     this.fetch$.next(Date.now());
-  }
-
-  ngOnDestroy() {
-    this.onDestroy$.next();
-    this.onDestroy$.complete();
   }
 
   getClassForTemperature(temp: number): string {
@@ -138,6 +137,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   toggleText() {
-    this.isTextVisible = !this.isTextVisible;
+    this.isTextVisible.set(!this.isTextVisible());
   }
 }

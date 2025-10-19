@@ -1,11 +1,11 @@
 @if (($appFlag|async)?.enabled === true) {
 
-  @if (!(loading$|async)) {
+  @if (!loading()) {
 
     <div class="flex flex-col gap-2 justify-center text-amber-100">
       <div class="flex flex-row justify-center m-2">
         <div class="flex flex-row justify-between w-full max-w-sm items-center">
-          <div>{{ today | date }}</div>
+          <div>{{ today() | date }}</div>
           <div class="flex justify-center cursor-pointer refresh " (click)="refresh()">
             <img alt="refresh" ngSrc="/temperature-blanket/assets/refresh-svgrepo-com.svg" width="25" height="25"/>
           </div>
@@ -16,22 +16,25 @@
           </div>
         </div>
       </div>
-      <div *ngIf="(missingDays$|async)?.length"
-           class="missing-days-list flex rounded-2xl justify-center items-center mx-5 p-1">Updated missing days: {{
-          (missingDays$|async) ?? [] | missingDays
-        }}
-      </div>
+      @if (missingDays().length) {
+        <div class="missing-days-list flex rounded-2xl justify-center items-center mx-5 p-1">Updated missing days: {{
+            missingDays() ?? [] | missingDays
+          }}
+        </div>
+      }
 
       <div class="text-amber-100 flex flex-wrap temperature-blanket">
-        <div class="day clickable" (click)="toggleText()" *ngFor="let day of response?.history?.data"
-             [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
-        >
-          <div [ngClass]="{'hidden': isTextVisible}">
-            <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
-            <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
+        @for (day of response()?.history?.data; track day?._id) {
+          <div class="day clickable" (click)="toggleText()"
+               [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
+          >
+            <div [ngClass]="{'hidden': isTextVisible}">
+              <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
+              <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
+            </div>
           </div>
-        </div>
-        <div class="outline accent-red-400" *ngIf="error$|async">{{ error$.getValue()?.error }}</div>
+        }
+        <div class="outline accent-red-400" *ngIf="apiError()?.error">{{ apiError()?.error }}</div>
       </div>
     </div>
   } @else {
