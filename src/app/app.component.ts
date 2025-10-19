@@ -24,6 +24,7 @@ import { FlagDescription, Flags } from './common/interfaces';
 import { MissingDaysPipe } from './common/missing-days.pipe';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GetTemperatureClassPipe } from './common/get-temperature-class.pipe';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -31,24 +32,30 @@ import { GetTemperatureClassPipe } from './common/get-temperature-class.pipe';
   styleUrl: './app.component.scss',
   providers: [WeatherService],
   imports: [
-    DatePipe,
     NgClass,
     NgIf,
     AsyncPipe,
     NgOptimizedImage,
     MissingDaysPipe,
     GetTemperatureClassPipe,
+    FormsModule,
+    DatePipe,
   ],
 })
 export class AppComponent implements OnInit {
   title = 'temperature-blanket';
   history$: Observable<HistoryQuery | HttpErrorResponse>;
   forecast$: Observable<ForecastQuery | HttpErrorResponse>;
-  today = signal<Date>(new Date());
   response = signal<HistoryQuery | undefined>(undefined);
   isTextHidden = signal<boolean>(true);
   apiError = signal<HttpErrorResponse | undefined>(undefined);
   loading = signal<boolean>(false);
+  today = signal<Date>(new Date());
+  selectedYear = signal<number>(new Date().getFullYear());
+  readonly SELECTABLE_YEARS = Array.from(
+    { length: 10 },
+    (_, i) => new Date().getFullYear() - i
+  );
   featureFlags$: Observable<FlagDescription[]>;
   $appFlag: Observable<FlagDescription | null>;
   missingDays = signal<string[]>([]);
@@ -126,11 +133,15 @@ export class AppComponent implements OnInit {
 
   refresh() {
     this.missingDays.set([]);
-    this.today.set(new Date());
     this.fetch$.next(Date.now());
   }
 
   toggleText() {
     this.isTextHidden.set(!this.isTextHidden());
+  }
+
+  handleYearChange() {
+    console.log('Selected year:', this.selectedYear());
+    this.refresh();
   }
 }
