@@ -23,6 +23,7 @@ import { FeatureFlagService } from './common/feature-flag.service';
 import { FlagDescription, Flags } from './common/interfaces';
 import { MissingDaysPipe } from './common/missing-days.pipe';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { GetTemperatureClassPipe } from './common/get-temperature-class.pipe';
 
 @Component({
   selector: 'app-root',
@@ -36,6 +37,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     AsyncPipe,
     NgOptimizedImage,
     MissingDaysPipe,
+    GetTemperatureClassPipe,
   ],
 })
 export class AppComponent implements OnInit {
@@ -44,7 +46,7 @@ export class AppComponent implements OnInit {
   forecast$: Observable<ForecastQuery | HttpErrorResponse>;
   today = signal<Date>(new Date());
   response = signal<HistoryQuery | undefined>(undefined);
-  isTextVisible = signal<boolean>(true);
+  isTextHidden = signal<boolean>(true);
   apiError = signal<HttpErrorResponse | undefined>(undefined);
   loading = signal<boolean>(false);
   featureFlags$: Observable<FlagDescription[]>;
@@ -128,15 +130,7 @@ export class AppComponent implements OnInit {
     this.fetch$.next(Date.now());
   }
 
-  getClassForTemperature(temp: number): string {
-    if (temp > 105) return 'color-105-plus';
-    if (temp < 30) return 'color-29-minus';
-    const lowerBound = Math.floor(temp / 5) * 5;
-    const upperBound = lowerBound + 4;
-    return `color-${lowerBound}-${upperBound}`;
-  }
-
   toggleText() {
-    this.isTextVisible.set(!this.isTextVisible());
+    this.isTextHidden.set(!this.isTextHidden());
   }
 }

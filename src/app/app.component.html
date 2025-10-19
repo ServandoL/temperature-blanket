@@ -18,7 +18,7 @@
       </div>
       @if (missingDays().length) {
         <div class="missing-days-list flex rounded-2xl justify-center items-center mx-5 p-1">Updated missing days: {{
-            missingDays() ?? [] | missingDays
+            missingDays() | missingDays
           }}
         </div>
       }
@@ -26,9 +26,9 @@
       <div class="text-amber-100 flex flex-wrap temperature-blanket">
         @for (day of response()?.history?.data; track day?._id) {
           <div class="day clickable" (click)="toggleText()"
-               [ngClass]="getClassForTemperature(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0)"
+               [ngClass]="(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0) | getTemperatureClass"
           >
-            <div [ngClass]="{'hidden': isTextVisible}">
+            <div [ngClass]="{'hidden': isTextHidden()}">
               <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
               <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
             </div>
