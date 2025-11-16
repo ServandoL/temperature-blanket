@@ -12,9 +12,9 @@ import { log } from '../index.js';
 import { toError } from '../utils.js';
 import { MongoRepo } from '../mongo.js';
 import { $Weather } from '../common.js';
-import { ObjectId, Document, AnyBulkWriteOperation, Filter } from 'mongodb';
+import { AnyBulkWriteOperation, Document, Filter, ObjectId } from 'mongodb';
 import { GraphQLError } from 'graphql';
-import { UpdateMissingDaysAggregateResponse } from '../interfaces';
+import { GetHistoryByDateInput, UpdateMissingDaysAggregateResponse, } from '../interfaces.js';
 
 export class ForecastDatasource extends RESTDataSource {
   override baseURL = 'http://api.weatherapi.com/v1/';
@@ -25,14 +25,6 @@ export class ForecastDatasource extends RESTDataSource {
     const key = process.env['WEATHER_API_KEY'];
     if (!key) throw new Error('No key provided');
     this.key = key;
-  }
-
-  private getToday() {
-    const today = new Date();
-    const day = today.getDate().toString().padStart(2, '0');
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const year = today.getFullYear();
-    return `${year}-${month}-${day}`;
   }
 
   async updateMissingDays(
@@ -153,7 +145,7 @@ export class ForecastDatasource extends RESTDataSource {
   }
 
   async getForecastHistoryByDate(
-    input: ForecastInput
+    input: GetHistoryByDateInput
   ): Promise<ForecastItem | undefined> {
     const loc = ForecastDatasource.name + '.getForecastHistoryByDate';
     if (!input.dt) {
@@ -166,22 +158,6 @@ export class ForecastDatasource extends RESTDataSource {
       throw new GraphQLError(baseError.message);
     }
     return baseResult;
-  }
-
-  private getDaysInMonth(month: number, year: number): string[] {
-    // Create an empty array to store the days
-    const days: string[] = [];
-
-    // Use the Date object to get the number of days in the month
-    const date = new Date(year, month, 0);
-    const daysInMonth = date.getDate();
-
-    // Push each day of the month to the array
-    for (let day = 1; day <= daysInMonth; day++) {
-      const formatted = day.toString().padStart(2, '0');
-      days.push(formatted);
-    }
-    return days;
   }
 
   async getForecast(input: ForecastInput): Promise<ForecastResponse> {
@@ -217,10 +193,10 @@ export class ForecastDatasource extends RESTDataSource {
         log.error({ loc, error: toError(error as Error) });
         throw new GraphQLError(error.message);
       }
-      const out: ForecastResponse = {
+
+      return {
         data: { _id, ...baseResult },
       };
-      return out;
     }
     const [updateError, _] = await to(
       MongoRepo.instance.collection<ForecastItem>($Weather).findOneAndUpdate(
@@ -238,14 +214,13 @@ export class ForecastDatasource extends RESTDataSource {
       log.error({ loc, error: toError(updateError as Error) });
       throw new GraphQLError(updateError.message);
     }
-    const out: ForecastResponse = {
+
+    return {
       data: { ...baseResult, ...found },
     };
-    return out;
   }
 
-  async getForecastHistory(): Promise<HistoryResponse> {
-    const loc = ForecastDatasource.name + '.getForecastHistory';
+  async getForecastHistory(input?: ForecastInput): Promise<HistoryResponse> {
     // Get the current date
     let currentDate = new Date();
     // Set the date to the beginning of the current year
@@ -256,21 +231,56 @@ export class ForecastDatasource extends RESTDataSource {
     let endOfYear = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59);
     // Convert to epoch time (in seconds)
     let epochTimeEndOfYear = Math.floor(endOfYear.getTime() / 1000);
+    if (input?.dt) {
+      const { year, month } = input.dt;
+      if (month <= 0 || month >= 13) {
+        throw new GraphQLError(
+          'Invalid range for month. Please enter within 1 and 12.'
+        );
+      }
+      startOfYear = new Date(year, 0, 1);
+      epochTimeStartOfYear = Math.floor(startOfYear.getTime() / 1000);
+      endOfYear = new Date(year, 11, 31, 23, 59, 59);
+      epochTimeEndOfYear = Math.floor(endOfYear.getTime() / 1000);
+    }
     const query: Filter<ForecastItem> = {
       'location.localtime_epoch': {
         $gte: epochTimeStartOfYear,
         $lte: epochTimeEndOfYear,
       },
     };
-    log.info({ loc, query });
     const data = await MongoRepo.instance
       .collection<ForecastItem>($Weather)
       .find(query)
       .sort({ 'forecast.forecastday.date': 1 })
       .toArray();
-    const out: HistoryResponse = {
+
+    return {
       data,
     };
-    return out;
+  }
+
+  private getToday() {
+    const today = new Date();
+    const day = today.getDate().toString().padStart(2, '0');
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const year = today.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+
+  private getDaysInMonth(month: number, year: number): string[] {
+    // Create an empty array to store the days
+    const days: string[] = [];
+
+    // Use the Date object to get the number of days in the month
+    const date = new Date(year, month, 0);
+    const daysInMonth = date.getDate();
+
+    // Push each day of the month to the array
+    for (let day = 1; day <= daysInMonth; day++) {
+      const formatted = day.toString().padStart(2, '0');
+      days.push(formatted);
+    }
+    return days;
   }
 }

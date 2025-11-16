@@ -1,9 +1,8 @@
-import { Db, MongoClient, Document, MongoClientOptions } from 'mongodb';
+import { Db, Document, MongoClient, MongoClientOptions } from 'mongodb';
 import { log } from './index.js';
 import { toError } from './utils.js';
 
 export class MongoRepo {
-  public static _instance: MongoRepo;
   private readonly _client: MongoClient;
   private _db: Db;
 
@@ -11,6 +10,7 @@ export class MongoRepo {
     const db = process.env['MONGO_DB'];
     if (!db) throw new Error('MONGO_DB env is required.');
     this._client = new MongoClient(url, options);
+    this._db = this._client.db(db);
     this._client
       .on('error', (err) => {
         log.error({ loc: MongoRepo.name, error: toError(err) });
@@ -26,16 +26,20 @@ export class MongoRepo {
       })
       .on('connectionReady', (event) => {
         log.info({ loc: MongoRepo.name, event });
+      })
+      .on('commandStarted', (event) => {
+        log.info({ loc: MongoRepo.name, event });
       });
-    this._db = this._client.db(db);
+  }
+
+  public static _instance: MongoRepo;
+
+  public static get instance() {
+    return MongoRepo._instance;
   }
 
   public get client() {
     return this._client;
-  }
-
-  public static get instance() {
-    return MongoRepo._instance;
   }
 
   public static async prepare(options?: MongoClientOptions) {

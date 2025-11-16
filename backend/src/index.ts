@@ -34,7 +34,7 @@ export const log = pino();
     introspection: process.env['INTROSPECTION'] === 'true',
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
-  await MongoRepo.prepare({ appName: 'blanket-api' });
+  await MongoRepo.prepare({ appName: 'blanket-api', monitorCommands: true });
   await server.start();
 
   app.use(
@@ -76,7 +76,7 @@ export const log = pino();
     }
     await next();
     if (toTrace) {
-      log.info({ loc: 'server.koa.response', body: ctx.response.body });
+      log.info({ loc: 'server.koa.response', status: ctx.response.status });
     }
   });
   app.use(

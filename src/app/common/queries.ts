@@ -19,8 +19,8 @@ export const GET_FORECAST_QUERY = gql`
   }
 `;
 export const GET_HISTORY_QUERY = gql`
-  query History {
-    history {
+  query History($input: ForecastInput) {
+    history(input: $input) {
       data {
         _id
         forecast {

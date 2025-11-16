@@ -1,8 +1,14 @@
 type Query {
-  history: HistoryResponse
+  history(input: ForecastInput): HistoryResponse
   forecast(input: ForecastInput!): ForecastResponse
   updateMissingDays(input: UpdateMissingDaysInput!): UpdateMissingDaysResponse
   forecastHistoryByDate(input: ForecastInput!): ForecastResponse
+}
+
+input ITime {
+  year: Int!
+  month: Int!
+  date: Int!
 }
 
 input UpdateMissingDaysInput {
@@ -19,8 +25,7 @@ type UpdateMissingDaysResponse {
 
 input ForecastInput {
   q: String!
-  """yyyy-mm-dd format"""
-  dt: String
+  dt: ITime
 }
 type ForecastResponse {
   data: ForecastItem

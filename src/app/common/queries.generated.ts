@@ -7,7 +7,9 @@ export type ForecastQueryVariables = Types.Exact<{
 
 export type ForecastQuery = { __typename?: 'Query', forecast?: { __typename?: 'ForecastResponse', data?: { __typename?: 'ForecastItem', _id?: string | null, forecast?: { __typename?: 'Forecast', forecastday?: Array<{ __typename?: 'ForecastDay', date?: string | null, date_epoch?: number | null, day?: { __typename?: 'ForecastDayDetail', avgtemp_f?: number | null } | null } | null> | null } | null } | null } | null };
 
-export type HistoryQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type HistoryQueryVariables = Types.Exact<{
+  input?: Types.InputMaybe<Types.ForecastInput>;
+}>;
 
 
 export type HistoryQuery = { __typename?: 'Query', history?: { __typename?: 'HistoryResponse', data?: Array<{ __typename?: 'ForecastItem', _id?: string | null, forecast?: { __typename?: 'Forecast', forecastday?: Array<{ __typename?: 'ForecastDay', date?: string | null, date_epoch?: number | null, day?: { __typename?: 'ForecastDayDetail', avgtemp_f?: number | null } | null } | null> | null } | null } | null> | null } | null };

@@ -143,8 +143,7 @@ export type ForecastDayHour = {
 };
 
 export type ForecastInput = {
-  /** yyyy-mm-dd format */
-  dt?: InputMaybe<Scalars['String']['input']>;
+  dt?: InputMaybe<ITime>;
   q: Scalars['String']['input'];
 };
 
@@ -178,6 +177,12 @@ export type HistoryResponse = {
   data?: Maybe<Array<Maybe<ForecastItem>>>;
 };
 
+export type ITime = {
+  date: Scalars['Int']['input'];
+  month: Scalars['Int']['input'];
+  year: Scalars['Int']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
   forecast?: Maybe<ForecastResponse>;
@@ -194,6 +199,11 @@ export type QueryForecastArgs = {
 
 export type QueryForecastHistoryByDateArgs = {
   input: ForecastInput;
+};
+
+
+export type QueryHistoryArgs = {
+  input?: InputMaybe<ForecastInput>;
 };
 
 

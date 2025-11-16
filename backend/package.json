@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npx tsc && cp src/schema.graphql dist/src",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "env-cmd node dist/src/index.js",
+    "start": "npm run build && env-cmd node dist/src/index.js",
     "debug": "npm run generate && npm run build && env-cmd node --loader ts-node/esm src/index.ts",
     "generate": "graphql-codegen --config tools/codegen.ts",
     "cp": "cp src/schema.graphql dist && cp package.json dist",

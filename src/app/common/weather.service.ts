@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import {
   GET_FORECAST_QUERY,
@@ -13,22 +13,26 @@ import {
   UpdateMissingDaysQuery,
   UpdateMissingDaysQueryVariables,
 } from './queries.generated';
-import { catchError, map, Observable, of } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 import {
+  ForecastInput,
   UpdateMissingDaysInput,
-  UpdateMissingDaysResponse,
 } from '../__generated__/types.server';
+import { ApolloQueryResult } from '@apollo/client';
+import { AppLoadingService } from './app-loading.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WeatherService {
-  constructor(private readonly apollo: Apollo) {}
+  private readonly _pollInterval = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  private _loadingService = inject(AppLoadingService);
+  private readonly apollo = inject(Apollo);
 
   public getMissingDays(
     input: UpdateMissingDaysInput
-  ): Observable<UpdateMissingDaysResponse | undefined | null> {
+  ): Observable<ApolloQueryResult<UpdateMissingDaysQuery>> {
+    this._loadingService.loading.set(true);
     return this.apollo
       .watchQuery<UpdateMissingDaysQuery, UpdateMissingDaysQueryVariables>({
         query: MISSING_DAYS_QUERY,
@@ -36,53 +40,38 @@ export class WeatherService {
         fetchPolicy: 'no-cache',
       })
       .valueChanges.pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          }
-          return result.data.updateMissingDays;
-        })
+        tap((response) => this._loadingService.loading.set(response.loading))
       );
   }
 
-  public getHistory(): Observable<HistoryQuery | HttpErrorResponse> {
+  public getHistory(
+    input?: ForecastInput
+  ): Observable<ApolloQueryResult<HistoryQuery>> {
+    this._loadingService.loading.set(true);
     return this.apollo
-      .watchQuery<
-        HistoryQuery,
-        HistoryQueryVariables
-      >({ query: GET_HISTORY_QUERY, fetchPolicy: 'no-cache' })
+      .watchQuery<HistoryQuery, HistoryQueryVariables>({
+        query: GET_HISTORY_QUERY,
+        fetchPolicy: 'cache-and-network',
+        variables: { input },
+      })
       .valueChanges.pipe(
-        map((data) => data.data),
-        catchError((err) => {
-          console.error(err);
-          return of(
-            new HttpErrorResponse({
-              error: err,
-            })
-          );
-        })
+        tap((response) => this._loadingService.loading.set(response.loading))
       );
   }
 
   public getForecast(
     variables: ForecastQueryVariables
-  ): Observable<ForecastQuery | HttpErrorResponse> {
+  ): Observable<ApolloQueryResult<ForecastQuery>> {
+    this._loadingService.loading.set(true);
     return this.apollo
       .watchQuery<ForecastQuery, ForecastQueryVariables>({
         query: GET_FORECAST_QUERY,
         variables,
-        fetchPolicy: 'no-cache',
+        fetchPolicy: 'cache-and-network',
+        pollInterval: this._pollInterval,
       })
       .valueChanges.pipe(
-        map((data) => data.data),
-        catchError((err) => {
-          console.error(err);
-          return of(
-            new HttpErrorResponse({
-              error: err,
-            })
-          );
-        })
+        tap((response) => this._loadingService.loading.set(response.loading))
       );
   }
 }

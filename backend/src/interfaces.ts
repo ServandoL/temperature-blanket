@@ -1,6 +1,10 @@
 import { ForecastDatasource } from './datasource/ForecastDatasource';
 import { BaseContext } from '@apollo/server';
-import { ForecastDay, ForecastItem } from '../__generated__/graphql';
+import {
+  ForecastDay,
+  ForecastInput,
+  ForecastItem,
+} from '../__generated__/graphql.js';
 
 export interface AppContext extends BaseContext {
   dataSources: AppDataSources;
@@ -15,4 +19,8 @@ export interface UpdateMissingDaysAggregateResponse
   forecast?: {
     forecastday?: ForecastDay;
   };
+}
+
+export interface GetHistoryByDateInput extends Omit<ForecastInput, 'dt'> {
+  dt?: string;
 }

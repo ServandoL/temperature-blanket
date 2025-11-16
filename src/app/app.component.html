@@ -1,4 +1,4 @@
-@if (($appFlag|async)?.enabled === true) {
+@if (appFlag()?.enabled === true) {
 
   @if (!loading()) {
 
@@ -6,13 +6,13 @@
       <div class="flex flex-col justify-center items-center gap-4 mx-auto">
         <div class="flex flex-row gap-4 items-center mt-4">
           <div class="flex">
-            <p>Today: {{ today() | date }}</p>
+            <p>{{ selectedYear() ? "Selected:" : "Today:" }} {{ (selectedYear() ?? today()) | yearSelect }}</p>
           </div>
           <div class="flex year-selector">
             <select id="year-selector" [(ngModel)]="selectedYear" (ngModelChange)="handleYearChange()"
                     class="bg-gray-800 text-amber-100 border border-gray-600 rounded px-3 py-2">
-              @for (year of SELECTABLE_YEARS; track year) {
-                <option [value]="year">{{ year }}</option>
+              @for (year of SELECTABLE_YEARS; track year.year) {
+                <option [value]="JSON.stringify(year)">{{ year.year }}</option>
               }
             </select>
           </div>
@@ -43,20 +43,25 @@
           }}
         </div>
       }
-
-      <div class="text-amber-100 flex flex-wrap temperature-blanket">
-        @for (day of response()?.history?.data; track day?._id) {
-          <div class="day clickable" (click)="toggleText()"
-               [ngClass]="(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0) | getTemperatureClass"
-          >
-            <div [ngClass]="{'hidden': isTextHidden()}">
-              <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
-              <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
+      @if (!response()?.history?.data?.length) {
+        <div class=" flex flex-wrap justify-center">
+          <div class="outline rounded p-2 accent-red-400">No data available for the selected year.</div>
+        </div>
+      } @else {
+        <div class="text-amber-100 flex flex-wrap temperature-blanket">
+          @for (day of response()?.history?.data; track day?._id) {
+            <div class="day clickable" (click)="toggleText()"
+                 [ngClass]="(day?.forecast?.forecastday?.[0]?.day?.avgtemp_f || 0) | getTemperatureClass"
+            >
+              <div [ngClass]="{'hidden': isTextHidden()}">
+                <p>{{ day?.forecast?.forecastday?.[0]?.date }}</p>
+                <p>{{ day?.forecast?.forecastday?.[0]?.day?.avgtemp_f }}</p>
+              </div>
             </div>
-          </div>
-        }
-        <div class="outline accent-red-400" *ngIf="apiError()?.error">{{ apiError()?.error }}</div>
-      </div>
+          }
+          <div class="outline rounded p-2 accent-red-400" *ngIf="apiError()?.error">{{ apiError()?.error }}</div>
+        </div>
+      }
     </div>
   } @else {
     <div class="mx-auto w-full max-w-sm rounded-md border border-blue-300 p-4 m-4">

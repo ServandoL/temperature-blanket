@@ -47,11 +47,16 @@ export interface FlagDescription {
   enabled: boolean;
 }
 
-
 export enum PublishEvents {
-  FLAG = 'flag'
+  FLAG = 'flag',
 }
 
 export enum Flags {
-  APP_BLANKET = 'App-blanket'
+  APP_BLANKET = 'App-blanket',
+}
+
+export interface ITime {
+  year: number;
+  month: number;
+  date: number;
 }
