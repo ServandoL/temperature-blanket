@@ -23,7 +23,7 @@ export class FeatureFlagService {
   private _featureFlags = new BehaviorSubject<FlagDescription[]>([]);
 
   constructor() {
-    if (environment.enableFeaturesFlags) {
+    if (environment.enableFeatureFlags) {
       this._socket = io('http://localhost:3000?room=temperature-blanket');
       this._socket.on('connect', () => {
         console.log({
